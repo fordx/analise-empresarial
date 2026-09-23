@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Análise Empresarial com IA
 
-## Getting Started
+Sistema SaaS para análise financeira e de departamentos de empresas. Os indicadores são calculados com DuckDB, e a Claude API interpreta os resultados e redige o relatório.
 
-First, run the development server:
+Arquitetura e princípios: veja [CLAUDE.md](CLAUDE.md).
+
+## Pré-requisitos
+
+- Node.js 22+
+- Uma conta no [Supabase](https://supabase.com)
+- Uma chave da [Claude API](https://console.anthropic.com)
+- Conta na [Vercel](https://vercel.com) e no GitHub (para deploy)
+
+> **Windows:** mantenha o projeto fora de pastas sincronizadas (OneDrive/Dropbox) e em um caminho sem acentos nem espaços, por exemplo `C:\dev\analise-empresarial`.
+
+## 1. Supabase
+
+1. Crie um projeto em https://supabase.com/dashboard.
+2. Em **Project Settings → API Keys**, copie:
+   - a URL do projeto;
+   - a **publishable key** (`sb_publishable_...`);
+   - a **secret key** (`sb_secret_...`). Ela fica só no servidor.
+3. Em **Authentication → URL Configuration**:
+   - **Site URL**: `http://localhost:3000` (em produção, a URL da Vercel);
+   - **Redirect URLs**: adicione `http://localhost:3000/auth/confirmar` e `https://SEU-APP.vercel.app/auth/confirmar`.
+4. (Opcional, em desenvolvimento) Em **Authentication → Sign In / Providers → Email**, desative *Confirm email* para entrar direto após o cadastro.
+5. As migrations do banco chegam na etapa 3. As instruções para aplicá-las serão adicionadas aqui.
+
+## 2. Variáveis de ambiente
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Preencha o `.env.local`. A descrição de cada variável está no próprio [.env.example](.env.example).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 3. Rodar localmente
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+npm run dev
+```
 
-## Learn More
+Acesse http://localhost:3000. Você será redirecionado para `/login`.
 
-To learn more about Next.js, take a look at the following resources:
+Testes e verificação:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm test
+npm run typecheck
+npm run lint
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 4. Deploy na Vercel
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Suba o repositório para o GitHub.
+2. Na Vercel, **Add New → Project** e importe o repositório. O framework (Next.js) é detectado sozinho.
+3. Em **Settings → Environment Variables**, cadastre as mesmas variáveis do `.env.local`.
+4. Faça o deploy e adicione a URL gerada nas Redirect URLs do Supabase (passo 1.3).
