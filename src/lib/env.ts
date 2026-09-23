@@ -17,13 +17,15 @@ const schema = z.object({
     .enum(["true", "false"])
     .default("true")
     .transform((v) => v === "true"),
+  HEALTH_CHECK_TOKEN: z.string().min(16).optional(),
 });
 
 type Env = z.infer<typeof schema>;
 
 export function env<K extends keyof Env>(chave: K): Env[K] {
   const campo = schema.shape[chave];
-  const resultado = campo.safeParse(process.env[chave]);
+  // Variável vazia no .env conta como ausente.
+  const resultado = campo.safeParse(process.env[chave] || undefined);
   if (!resultado.success) {
     throw new Error(`Variável de ambiente inválida ou ausente: ${chave}`);
   }
