@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { configPublicaSupabase } from "./publico";
 
 const ROTAS_PUBLICAS = ["/login", "/auth"];
 
@@ -7,9 +8,19 @@ const ROTAS_PUBLICAS = ["/login", "/auth"];
 export async function atualizarSessao(request: NextRequest) {
   let response = NextResponse.next({ request });
 
+  let config: ReturnType<typeof configPublicaSupabase>;
+  try {
+    config = configPublicaSupabase();
+  } catch (e) {
+    // Erro de configuração do deploy: a mensagem só cita nomes de variáveis, nunca valores.
+    const mensagem = e instanceof Error ? e.message : String(e);
+    console.error(`[proxy] ${mensagem}`);
+    return new NextResponse(`Erro de configuração do servidor: ${mensagem}`, { status: 500 });
+  }
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    config.url,
+    config.chave,
     {
       cookies: {
         getAll() {

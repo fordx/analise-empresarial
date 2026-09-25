@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { env } from "@/lib/env";
+import { configPublicaSupabase } from "./publico";
 
 /**
  * Cliente com a chave secreta: IGNORA o RLS.
@@ -8,9 +9,8 @@ import { env } from "@/lib/env";
  * e sempre filtrando explicitamente por empresa_id.
  */
 export function createAdminClient() {
-  return createSupabaseClient(
-    env("NEXT_PUBLIC_SUPABASE_URL"),
-    env("SUPABASE_SECRET_KEY"),
-    { auth: { persistSession: false, autoRefreshToken: false } },
-  );
+  const { url } = configPublicaSupabase();
+  return createSupabaseClient(url, env("SUPABASE_SECRET_KEY"), {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
 }
